@@ -1,0 +1,21 @@
+.liveblog-wordpress {
+  min-width: 0;
+}
+
+.liveblog-wordpress .liveblog-notice {
+  box-sizing: border-box;
+  padding: 1rem;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  font: inherit;
+}
+
+.liveblog-wordpress .liveblog-notice p {
+  margin: 0;
+}
+
+.liveblog-wordpress .liveblog-notice button {
+  margin-top: 0.75rem;
+  cursor: pointer;
+  font: inherit;
+}

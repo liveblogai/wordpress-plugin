@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "liveblog/embed",
+  "version": "0.1.5",
+  "title": "LiveblogAI",
+  "category": "embed",
+  "description": "Embed live coverage from LiveblogAI.",
+  "textdomain": "liveblog",
+  "attributes": {
+    "liveblogId": { "type": "string", "default": "" },
+    "mode": { "type": "string", "default": "" }
+  },
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "spacing": { "margin": true, "padding": true }
+  },
+  "editorScript": "liveblog-editor",
+  "editorStyle": "liveblog-editor",
+  "style": "liveblog-frontend"
+}
