@@ -2,7 +2,7 @@
 /**
  * Plugin Name: LiveblogAI
  * Description: Embed live coverage with server-rendered content and real-time updates.
- * Version: 0.1.5
+ * Version: 0.1.6
  * Requires at least: 6.3
  * Requires PHP: 8.1
  * Author: LiveblogAI
@@ -10,7 +10,7 @@
  * Plugin URI: https://github.com/liveblogai/wordpress-plugin
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: liveblog
+ * Text Domain: liveblogai
  */
 
 /**
@@ -22,7 +22,7 @@ namespace Liveblog\WordPress;
 
 defined('ABSPATH') || exit;
 
-const VERSION = '0.1.5';
+const VERSION = '0.1.6';
 const OPTION = 'liveblog_settings';
 const SHORTCODE = 'liveblog';
 const MODE_SSR = 'ssr';
@@ -52,7 +52,7 @@ function register_embed(): void {
     wp_register_style('liveblog-frontend', plugins_url('frontend.css', __FILE__), array(), VERSION);
     // 先安装错误监听，再让浏览器请求延迟执行的远程引导器，避免下载失败事件早于监听。
     wp_register_script('liveblog-feedback', plugins_url('frontend.js', __FILE__), array(), VERSION, true);
-    wp_set_script_translations('liveblog-editor', 'liveblog');
+    wp_set_script_translations('liveblog-editor', 'liveblogai');
     wp_localize_script('liveblog-editor', 'liveblogWordPress', array(
         'renderOrigin' => service_config()['render'],
         'defaultMode' => resolve_mode(''),

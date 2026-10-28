@@ -166,7 +166,7 @@ await writeFile(
 
 const archive: Zippable = {}
 for (const name of (await readdir(output)).sort()) {
-  archive[`liveblog/${name}`] = [
+  archive[`liveblogai/${name}`] = [
     new Uint8Array(await readFile(resolve(output, name))),
     { mtime: new Date('2020-01-01T00:00:00Z') },
   ]

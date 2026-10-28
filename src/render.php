@@ -46,7 +46,7 @@ function restore_fragments(string $content): string {
  */
 function notice_html(string $message, bool $retry = false): string {
     return '<div class="liveblog-notice" role="status"><p>' . esc_html($message) . '</p>'
-        . ($retry ? '<button type="button" data-liveblog-retry>' . esc_html__('Retry LiveblogAI', 'liveblog') . '</button>' : '')
+        . ($retry ? '<button type="button" data-liveblog-retry>' . esc_html__('Retry LiveblogAI', 'liveblogai') . '</button>' : '')
         . '</div>';
 }
 
@@ -58,31 +58,31 @@ function render_ssr(string $id): string {
     static $spent = 0.0;
     $origin = service_config()['render'];
     if ($origin === '') {
-        return notice_html(__('The LiveblogAI service is not configured correctly.', 'liveblog'));
+        return notice_html(__('The LiveblogAI service is not configured correctly.', 'liveblogai'));
     }
     $remaining = PAGE_REQUEST_BUDGET - $spent;
     if ($remaining < 0.5) {
-        return notice_html(__('Live coverage could not be loaded in time.', 'liveblog'), true);
+        return notice_html(__('Live coverage could not be loaded in time.', 'liveblogai'), true);
     }
     $started = microtime(true);
     $response = request_service($origin . '/v1/liveblogs/' . rawurlencode($id) . '/fragment', min(REQUEST_TIMEOUT, $remaining), MAX_HTML_BYTES + 1);
     $spent += microtime(true) - $started;
     if (is_wp_error($response)) {
-        return notice_html(__('Live coverage could not be loaded. Please try again.', 'liveblog'), true);
+        return notice_html(__('Live coverage could not be loaded. Please try again.', 'liveblogai'), true);
     }
     $status = wp_remote_retrieve_response_code($response);
     if ($status === 404) {
-        return notice_html(__('This liveblog is not available to readers yet, or does not exist.', 'liveblog'), true);
+        return notice_html(__('This liveblog is not available to readers yet, or does not exist.', 'liveblogai'), true);
     }
     if ($status === 410) {
-        return notice_html(__('This liveblog has been taken offline.', 'liveblog'));
+        return notice_html(__('This liveblog has been taken offline.', 'liveblogai'));
     }
     $html = wp_remote_retrieve_body($response);
     $type = wp_remote_retrieve_header($response, 'content-type');
     if ($status !== 200 || !is_string($type) || !preg_match('/\Atext\/html(?:\s*;|\s*\z)/i', $type)
         || $html === '' || strlen($html) > MAX_HTML_BYTES
-        || !str_starts_with($html, '<section data-render-instance="' . $id . '">')) {
-        return notice_html(__('Live coverage could not be loaded. Please try again.', 'liveblog'), true);
+        || !preg_match('/\A(?:<link\b[^>]*>\s*)*<section data-render-instance="' . preg_quote($id, '/') . '">/', $html)) {
+        return notice_html(__('Live coverage could not be loaded. Please try again.', 'liveblogai'), true);
     }
     // 这是固定可信 Render 的可执行嵌入合同；不能用文章 KSES 删除脚本、快照或 Shadow DOM。
     // 作者输入只参与 ID 路径，不参与服务选择、HTML 拼接或脚本地址。
@@ -96,12 +96,12 @@ function render_ssr(string $id): string {
 function render_js(string $id): string {
     $script = service_config()['script'];
     if ($script === '') {
-        return notice_html(__('The LiveblogAI service is not configured correctly.', 'liveblog'));
+        return notice_html(__('The LiveblogAI service is not configured correctly.', 'liveblogai'));
     }
     wp_enqueue_script('liveblog-embed', $script, array('liveblog-feedback'), null, array('strategy' => 'defer', 'in_footer' => true));
-    return '<div data-liveblog-js><div data-liveblog-id="' . esc_attr($id) . '"><p>' . esc_html__('Loading LiveblogAI…', 'liveblog') . '</p></div>'
-        . '<template data-liveblog-script-error>' . notice_html(__('The LiveblogAI script could not be loaded.', 'liveblog'), true) . '</template>'
-        . '<noscript>' . esc_html__('Enable JavaScript to read this liveblog.', 'liveblog') . '</noscript></div>';
+    return '<div data-liveblog-js><div data-liveblog-id="' . esc_attr($id) . '"><p>' . esc_html__('Loading LiveblogAI…', 'liveblogai') . '</p></div>'
+        . '<template data-liveblog-script-error>' . notice_html(__('The LiveblogAI script could not be loaded.', 'liveblogai'), true) . '</template>'
+        . '<noscript>' . esc_html__('Enable JavaScript to read this liveblog.', 'liveblogai') . '</noscript></div>';
 }
 
 /**
@@ -112,16 +112,16 @@ function render_js(string $id): string {
 function render_embed($id, $mode): string {
     static $instances = array();
     if (!is_string($id) || !preg_match('/\A[A-Za-z0-9_-]{1,128}\z/', $id)) {
-        return notice_html(__('Enter a valid liveblog ID.', 'liveblog'));
+        return notice_html(__('Enter a valid liveblog ID.', 'liveblogai'));
     }
     // 编辑器和机器读取不会触发远程请求，也不返回可执行正文。
     if (is_admin() || is_feed() || doing_filter('get_the_excerpt') || doing_filter('the_excerpt') || (defined('REST_REQUEST') && REST_REQUEST)) {
-        return notice_html(__('Live coverage is available on the published page.', 'liveblog'));
+        return notice_html(__('Live coverage is available on the published page.', 'liveblogai'));
     }
     wp_enqueue_style('liveblog-frontend');
     wp_enqueue_script('liveblog-feedback');
     if (isset($instances[$id])) {
-        return notice_html(__('This liveblog already appears on this page.', 'liveblog'));
+        return notice_html(__('This liveblog already appears on this page.', 'liveblogai'));
     }
     $instances[$id] = true;
     if (resolve_mode($mode) === MODE_JS) {

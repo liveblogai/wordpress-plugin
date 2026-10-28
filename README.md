@@ -77,7 +77,7 @@ Keep versions synchronized in `package.json`, `src/block.json`, `src/liveblog.ph
 pnpm release
 ```
 
-This creates `dist/liveblog-<version>.zip` and its `.sha256` file, plus `dist/liveblog.zip`. Check the checksum from `dist/` with `shasum -a 256 -c liveblog-<version>.zip.sha256`. The ZIP always contains the top-level directory `liveblog/` for compatible upgrades. Rebuilding replaces `dist/`, so archive prior releases separately.
+This creates `dist/liveblog-<version>.zip` and its `.sha256` file, plus `dist/liveblog.zip`. Check the checksum from `dist/` with `shasum -a 256 -c liveblog-<version>.zip.sha256`. The ZIP contains the distinctive top-level directory `liveblogai/`, matching its translation domain and intended WordPress.org slug. Pre-submission ZIPs through 0.1.5 used `liveblog/`; deactivate that local preview installation before installing 0.1.6. Saved blocks and shortcodes remain compatible. Rebuilding replaces `dist/`, so archive prior releases separately.
 
 Release commands produce local files only. They do not publish to GitHub or WordPress.org, deploy services, or create Git tags. Distribution files exclude TypeScript sources and build tooling. Internal code comments are stripped; legal notices and the license are retained. Source comments remain available in this repository.
 
