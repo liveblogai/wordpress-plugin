@@ -12,7 +12,7 @@ function &pending_fragments(): array {
 
 /**
  * 文章格式化结束后再插入正文，避免智能引号和表情转换破坏 hydration。
- * @param html - 已验证来源的完整 SSR 片段。
+ * @param html - 已逐项校验并清洗、由插件重建的 SSR 片段。
  */
 function protect_fragment(string $html): string {
     if (!doing_filter('the_content')) {
@@ -51,10 +51,12 @@ function notice_html(string $message, bool $retry = false): string {
 }
 
 /**
- * 读取公开 SSR 片段，保留完整标记且不存储跨请求副本。
+ * 读取公开 SSR 片段，经安全重建后输出且不存储跨请求副本。
  * @param id - 已校验的直播 ID。
+ * @param theme - 恢复请求选择的不可变主题摘要或 default。
+ * @param minimum_version - 恢复请求必须保留的读取水位。
  */
-function render_ssr(string $id): string {
+function render_ssr(string $id, string $theme = '', ?int $minimum_version = null): string {
     static $spent = 0.0;
     $origin = service_config()['render'];
     if ($origin === '') {
@@ -65,7 +67,14 @@ function render_ssr(string $id): string {
         return notice_html(__('Live coverage could not be loaded in time.', 'liveblogai'), true);
     }
     $started = microtime(true);
-    $response = request_service($origin . '/v1/liveblogs/' . rawurlencode($id) . '/fragment', min(REQUEST_TIMEOUT, $remaining), MAX_HTML_BYTES + 1);
+    $url = $origin . '/v1/liveblogs/' . rawurlencode($id) . '/fragment';
+    if ($theme !== '') {
+        $url = add_query_arg('theme', $theme, $url);
+    }
+    if ($minimum_version !== null) {
+        $url = add_query_arg('version', $minimum_version, $url);
+    }
+    $response = request_service($url, min(REQUEST_TIMEOUT, $remaining), MAX_HTML_BYTES + 1);
     $spent += microtime(true) - $started;
     if (is_wp_error($response)) {
         return notice_html(__('Live coverage could not be loaded. Please try again.', 'liveblogai'), true);
@@ -84,9 +93,11 @@ function render_ssr(string $id): string {
         || !preg_match('/\A(?:<link\b[^>]*>\s*)*<section data-render-instance="' . preg_quote($id, '/') . '">/', $html)) {
         return notice_html(__('Live coverage could not be loaded. Please try again.', 'liveblogai'), true);
     }
-    // 这是固定可信 Render 的可执行嵌入合同；不能用文章 KSES 删除脚本、快照或 Shadow DOM。
-    // 作者输入只参与 ID 路径，不参与服务选择、HTML 拼接或脚本地址。
-    return protect_fragment($html);
+    $safe_html = sanitize_render_fragment($html, $id);
+    if ($safe_html === '') {
+        return notice_html(__('Live coverage could not be loaded safely. Please try again.', 'liveblogai'), true);
+    }
+    return protect_fragment($safe_html);
 }
 
 /**
@@ -147,4 +158,24 @@ function render_block(array $attributes): string {
 function render_shortcode($attributes): string {
     $attributes = shortcode_atts(array('id' => '', 'mode' => ''), $attributes, SHORTCODE);
     return '<div class="liveblog-wordpress">' . render_embed($attributes['id'], $attributes['mode']) . '</div>';
+}
+
+/** 匿名只读恢复入口：主题兜底与重试复用首屏清洗，并把版本下限传回 Render。 */
+function render_retry(): void {
+    // 此端点不修改站点状态，不依赖登录或 nonce；只接受有界的公开读取参数。
+    $id = isset($_GET['id']) && is_string($_GET['id']) ? wp_unslash($_GET['id']) : '';
+    $theme = isset($_GET['theme']) && is_string($_GET['theme']) ? wp_unslash($_GET['theme']) : '';
+    $version = isset($_GET['version']) && is_string($_GET['version']) ? wp_unslash($_GET['version']) : '';
+    if (!preg_match('/\A[A-Za-z0-9_-]{1,128}\z/', $id)
+        || !preg_match('/\A(?:default|[a-f0-9]{64})\z/', $theme)
+        || ($version !== '' && (!preg_match('/\A(?:0|[1-9][0-9]{0,15})\z/', $version) || (float) $version > 9007199254740991))) {
+        status_header(400);
+        exit;
+    }
+    prevent_page_cache();
+    header('Content-Type: text/html; charset=UTF-8');
+    header('X-Content-Type-Options: nosniff');
+    // 输出只来自 sanitize_render_fragment 重建的安全宿主或已转义提示，不透传远程正文。
+    echo render_ssr($id, $theme, $version === '' ? null : (int) $version);
+    exit;
 }

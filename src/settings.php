@@ -43,6 +43,8 @@ function service_config(): array {
     if ($config === null) {
         $config = array(
             'render' => validate_service_url(defined('LIVEBLOG_RENDER_ORIGIN') ? constant('LIVEBLOG_RENDER_ORIGIN') : 'https://render.liveblog.ai', true),
+            'assets' => validate_service_url(defined('LIVEBLOG_ASSET_ORIGIN') ? constant('LIVEBLOG_ASSET_ORIGIN') : 'https://cdn.liveblog.ai', true),
+            'reader' => validate_service_url(defined('LIVEBLOG_READER_ORIGIN') ? constant('LIVEBLOG_READER_ORIGIN') : 'https://reader.api.liveblog.ai', true),
             'script' => validate_service_url(defined('LIVEBLOG_EMBED_SCRIPT_URL') ? constant('LIVEBLOG_EMBED_SCRIPT_URL') : 'https://render.liveblog.ai/embed.js', false),
         );
     }

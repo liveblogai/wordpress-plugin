@@ -3,7 +3,7 @@ Contributors: liveai
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.1.6
+Stable tag: 0.1.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: liveblog, live coverage, embed
@@ -50,7 +50,7 @@ Server-rendered pages must be excluded from cache plugins, host caches and CDNs.
 
 Exclude LiveblogAI markup from script combining, HTML rewriting and delayed JavaScript execution. Preserve module scripts, JSON, integrity attributes and declarative Shadow DOM.
 
-Previews are isolated iframes. Frontend server rendering embeds the HTML fragment directly. RSS and REST responses include a placeholder instead of executable content. WordPress continues to own the page URL, title, description and sharing metadata.
+Previews are isolated iframes. Frontend server rendering sanitizes the initial content and reconstructs validated runtime resources. Theme recovery and retries pass through the same sanitization on the WordPress server. Embedded frames use an opaque-origin sandbox; custom CSS is limited to a safe subset. RSS and REST responses include a placeholder instead of executable content. WordPress continues to own the page URL, title, description and sharing metadata.
 
 Only the initial posts are included in server-rendered HTML. The plugin does not create historical pagination URLs. The same liveblog can appear only once on a page.
 
@@ -69,6 +69,11 @@ No. WordPress stores only the liveblog ID and display settings. Content is retri
 Use JavaScript mode on cached pages. Server-rendered embeds require excluding their pages from cache plugins, host caches and CDNs, and purging existing cached copies.
 
 == Changelog ==
+
+= 0.1.7 =
+* Sanitize server-rendered content and reconstruct validated hydration resources.
+* Encode initialization data safely while retaining server rendering and live updates.
+* Apply the same sanitization to theme recovery and retry responses.
 
 = 0.1.6 =
 * Accept Render font links before the server-rendered instance.

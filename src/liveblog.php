@@ -2,7 +2,7 @@
 /**
  * Plugin Name: LiveblogAI
  * Description: Embed live coverage with server-rendered content and real-time updates.
- * Version: 0.1.6
+ * Version: 0.1.7
  * Requires at least: 6.3
  * Requires PHP: 8.1
  * Author: LiveblogAI
@@ -22,7 +22,7 @@ namespace Liveblog\WordPress;
 
 defined('ABSPATH') || exit;
 
-const VERSION = '0.1.6';
+const VERSION = '0.1.7';
 const OPTION = 'liveblog_settings';
 const SHORTCODE = 'liveblog';
 const MODE_SSR = 'ssr';
@@ -32,6 +32,7 @@ const REQUEST_TIMEOUT = 5;
 const PAGE_REQUEST_BUDGET = 8;
 
 require_once __DIR__ . '/settings.php';
+require_once __DIR__ . '/sanitize.php';
 require_once __DIR__ . '/render.php';
 require_once __DIR__ . '/cache.php';
 
@@ -77,3 +78,6 @@ add_action('admin_post_liveblog_check_connection', __NAMESPACE__ . '\\check_conn
 add_action('wp', __NAMESPACE__ . '\\prepare_page_cache', 0);
 add_action('wp_footer', __NAMESPACE__ . '\\print_late_styles', 1);
 add_filter('the_content', __NAMESPACE__ . '\\restore_fragments', PHP_INT_MAX);
+
+add_action('wp_ajax_liveblog_render_fragment', __NAMESPACE__ . '\\render_retry');
+add_action('wp_ajax_nopriv_liveblog_render_fragment', __NAMESPACE__ . '\\render_retry');

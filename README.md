@@ -48,6 +48,16 @@ Use JavaScript mode when cache exclusion is unavailable. Exclude embed markup fr
 
 SSR fragments are not saved in Transients, object caches, or the database. Network failures show a local retry message rather than stale content. Feeds and REST content use placeholders instead of executable fragments.
 
+## Server-rendered output safety
+
+Remote fragments are separated into content, initialization data and resource descriptors before output. Content passes through a local WordPress KSES allowlist and balanced markup; event handlers and executable URLs are removed. Nested Shadow DOM, basic SVG and supported CSS are retained. Inline CSS is restricted to a subset without escapes or external-resource functions. Embedded frames receive an opaque-origin sandbox with script permission only; custom styling and third-party embeds that require other capabilities need compatibility checks.
+
+The plugin validates the liveblog ID, Reader origin, immutable asset origins and paths, and SHA-256 integrity format. Initialization JSON is decoded and re-encoded with HTML-sensitive characters escaped. WordPress script APIs generate the module tags and enqueue the content-addressed hydration script. Invalid fragments fail closed with an escaped retry message.
+
+Theme recovery and retries use a public, read-only WordPress AJAX endpoint, which validates parameters and applies the same fragment sanitization. The Reader version lower bound is forwarded to Render. This endpoint neither modifies WordPress content nor forwards visitor credentials. There is no global relaxation of WordPress HTML filtering.
+
+The settings sanitizer accepts only the supported `js` / `ssr` modes and discards unknown fields. SSR still includes the initial posts, and the existing browser runtime handles live updates and pagination.
+
 ## External services and privacy
 
 This repository contains the WordPress integration only. The LiveblogAI cloud service, reader runtime, and other applications are separate and are not licensed by this repository's license.
@@ -65,6 +75,8 @@ Only site operators can override service URLs in `wp-config.php`:
 ```php
 define('LIVEBLOG_RENDER_ORIGIN', 'https://render.liveblog.ai');
 define('LIVEBLOG_EMBED_SCRIPT_URL', 'https://render.liveblog.ai/embed.js');
+define('LIVEBLOG_ASSET_ORIGIN', 'https://cdn.liveblog.ai');
+define('LIVEBLOG_READER_ORIGIN', 'https://reader.api.liveblog.ai');
 ```
 
 Production URLs require HTTPS and must not contain credentials, queries, or fragments. Explicit HTTP loopback URLs are accepted only when `WP_ENVIRONMENT_TYPE` is `local` or `development`. Redirects remain disabled. Authors cannot select arbitrary service URLs.
@@ -77,7 +89,7 @@ Keep versions synchronized in `package.json`, `src/block.json`, `src/liveblog.ph
 pnpm release
 ```
 
-This creates `dist/liveblog-<version>.zip` and its `.sha256` file, plus `dist/liveblog.zip`. Check the checksum from `dist/` with `shasum -a 256 -c liveblog-<version>.zip.sha256`. The ZIP contains the distinctive top-level directory `liveblogai/`, matching its translation domain and intended WordPress.org slug. Pre-submission ZIPs through 0.1.5 used `liveblog/`; deactivate that local preview installation before installing 0.1.6. Saved blocks and shortcodes remain compatible. Rebuilding replaces `dist/`, so archive prior releases separately.
+This creates `dist/liveblog-<version>.zip` and its `.sha256` file, plus `dist/liveblog.zip`. Check the checksum from `dist/` with `shasum -a 256 -c liveblog-<version>.zip.sha256`. Since 0.1.6, the ZIP uses the top-level directory `liveblogai/`, matching its translation domain and assigned WordPress.org slug. Deactivate local preview installations through 0.1.5, which used `liveblog/`, before installing the new package. Existing `liveblog/embed` blocks, `[liveblog]` shortcodes and saved settings remain compatible. Rebuilding replaces `dist/`, so archive prior releases separately.
 
 Release commands produce local files only. They do not publish to GitHub or WordPress.org, deploy services, or create Git tags. Distribution files exclude TypeScript sources and build tooling. Internal code comments are stripped; legal notices and the license are retained. Source comments remain available in this repository.
 

@@ -80,6 +80,7 @@ function preparePhp(content: string, name: string) {
 const files = [
   'liveblog.php',
   'render.php',
+  'sanitize.php',
   'cache.php',
   'settings.php',
   'block.json',
