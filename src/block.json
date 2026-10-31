@@ -2,11 +2,11 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "liveblog/embed",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "title": "LiveblogAI",
   "category": "embed",
   "description": "Embed live coverage from LiveblogAI.",
-  "textdomain": "liveblog",
+  "textdomain": "liveblogai",
   "attributes": {
     "liveblogId": { "type": "string", "default": "" },
     "mode": { "type": "string", "default": "" }
