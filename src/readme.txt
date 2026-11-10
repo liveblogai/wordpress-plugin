@@ -8,13 +8,21 @@ License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: liveblog, live coverage, embed
 
-Embed live coverage in WordPress with a LiveblogAI block or shortcode.
+Publish live coverage on WordPress with LiveblogAI. Keep readers up to date on sports, breaking news, community events and financial markets.
 
 == Description ==
 
-Use server rendering for the first posts, followed by LiveblogAI's real-time browser updates. JavaScript mode is available for sites that must retain full-page caching.
+The LiveblogAI plugin brings the coverage you publish on the LiveblogAI platform to your WordPress site and keeps it up to date in real time. Cover sports, breaking news, community events or financial markets around the clock.
 
-WordPress saves the liveblog ID and display settings. It does not store live coverage, account credentials, or a copy of the LiveblogAI reader runtime.
+Live coverage with LiveblogAI can keep readers on your site longer and help improve your site's SEO.
+
+= Support =
+
+If you have a question or need help using the plugin, email us at [support@liveblog.ai](mailto:support@liveblog.ai).
+
+= Website =
+
+Learn more about LiveblogAI on our [official website](https://liveblog.ai/). [Plugin source on GitHub](https://github.com/liveblogai/wordpress-plugin).
 
 == Installation ==
 
@@ -23,50 +31,33 @@ WordPress saves the liveblog ID and display settings. It does not store live cov
 3. Click Preview LiveblogAI to see the public content, then publish your post.
 4. For server rendering, exclude that page from all full-page caches and purge existing cached copies. Otherwise select JavaScript mode in Settings > LiveblogAI or use [liveblog id="YOUR_ID" mode="js"].
 
-== External services ==
-
-This plugin requires the LiveblogAI service at https://liveblog.ai. Adding an embed authorizes requests needed to display public coverage. Activation alone makes no remote request. Editor previews load only when explicitly opened.
-
-Server rendering sends the liveblog ID and plugin version to https://render.liveblog.ai. It does not forward visitor cookies, authorization headers, or WordPress credentials.
-
-Reader browsers load rendering code and styles from https://render.liveblog.ai and https://cdn.liveblog.ai, and fetch public content and updates from https://reader.api.liveblog.ai over HTTPS and WSS. These services receive network information such as the client's IP address as part of normal requests. Post media may load from its own source URLs.
-
-The administrator's Check Render connection button requests only the Render health endpoint. It does not verify a particular liveblog or the browser's content security policy.
-
-Service terms: https://liveblog.ai/terms
-Privacy policy: https://liveblog.ai/privacy
-
-== Source code and build instructions ==
-
-The complete, uncompressed plugin source and build tools are publicly available at https://github.com/liveblogai/wordpress-plugin.
-
-Build instructions: https://github.com/liveblogai/wordpress-plugin#build-from-source
-
-Use the Node.js version in .nvmrc and pnpm 10.32.1. Run `pnpm install --frozen-lockfile`, then `pnpm build` to create `dist/liveblog.zip`. JavaScript is bundled from the TypeScript source in src/; PHP and CSS are packaged by scripts/build.ts. The plugin uses WordPress's own React and editor APIs.
-
-== Caching and compatibility ==
-
-Server-rendered pages must be excluded from cache plugins, host caches and CDNs. No-store headers and DONOTCACHEPAGE cannot override a response served before PHP executes. This includes embeddings in templates, widgets and page builders. JavaScript mode can be used on cached pages.
-
-Exclude LiveblogAI markup from script combining, HTML rewriting and delayed JavaScript execution. Preserve module scripts, JSON, integrity attributes and declarative Shadow DOM.
-
-Previews are isolated iframes. Frontend server rendering sanitizes the initial content and reconstructs validated runtime resources. Theme recovery and retries pass through the same sanitization on the WordPress server. Embedded frames use an opaque-origin sandbox; custom CSS is limited to a safe subset. RSS and REST responses include a placeholder instead of executable content. WordPress continues to own the page URL, title, description and sharing metadata.
-
-Only the initial posts are included in server-rendered HTML. The plugin does not create historical pagination URLs. The same liveblog can appear only once on a page.
-
 == Frequently Asked Questions ==
 
-= Do I need a LiveblogAI account? =
+= Where do my reporters write updates? =
 
-You need a public liveblog hosted by LiveblogAI. Creating and publishing coverage is managed in the LiveblogAI service, outside WordPress. This plugin embeds existing public coverage and does not store LiveblogAI account credentials.
+Create and publish your liveblog in LiveblogAI. In WordPress, add its public ID to the article once. Reporters can then publish updates from LiveblogAI while the article stays live.
 
-= Does this plugin store liveblog posts in WordPress? =
+= Do I need to connect a LiveblogAI account to WordPress? =
 
-No. WordPress stores only the liveblog ID and display settings. Content is retrieved from the LiveblogAI service.
+You only need the ID of a public LiveblogAI liveblog to embed it. Your team uses a LiveblogAI account to manage coverage. WordPress stores the ID and display settings, and readers can follow public coverage without signing in.
 
-= Can I use this with a full-page cache? =
+Previewing or viewing an embed connects to LiveblogAI to load coverage. LiveblogAI receives the liveblog ID and the browser’s IP address. Server-rendered requests also send the plugin version. [Terms of service](https://liveblog.ai/terms) · [Privacy policy](https://liveblog.ai/privacy).
 
-Use JavaScript mode on cached pages. Server-rendered embeds require excluding their pages from cache plugins, host caches and CDNs, and purging existing cached copies.
+= Can I use the Classic Editor? =
+
+Yes. Paste `[liveblog id="YOUR_ID"]` on its own line in your post and replace `YOUR_ID` with the public liveblog ID. In the block editor, search for the LiveblogAI block instead.
+
+= Will readers see updates if they already have the article open? =
+
+Yes. Once the live feed connects, new posts appear in the embedded feed. Readers can keep the article open throughout the event.
+
+= Will it work with my caching plugin or CDN? =
+
+Yes. For a page that needs full-page caching, choose JavaScript mode under Settings > LiveblogAI, or use `[liveblog id="YOUR_ID" mode="js"]` for one embed. If you choose server rendering, exclude that page from your caching plugin, host cache and CDN, then purge any existing cached copy.
+
+= Does each update become a separate WordPress post? =
+
+No. All updates appear in the article where you placed the embed. LiveblogAI hosts the coverage, and WordPress manages the article's URL, title and sharing metadata.
 
 == Changelog ==
 
